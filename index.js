@@ -71,7 +71,7 @@ function generateQuiz() {
   </form>`;
   $('.main-container').html(startQuizHtml);  
 }
-generateQuiz();  
+  
 
 
 /* when user clicks on start quiz button -->
@@ -88,7 +88,7 @@ function startQuiz() {
     updateQuestionNumber();
   });
 }
-startQuiz();
+
 
 function displayQuestionNumber() {
   const questionHtml = `
@@ -114,7 +114,8 @@ function generateAQuestion(questionObj) {
       <span>${option}</span>
       </label>`;
   }).join('');
-console.log()
+  console.log(questionSelector);
+  console.log(questionFormMaker);
   return `
     <form class="question-container" id="submit-answer">
       <fieldset>
@@ -123,7 +124,11 @@ console.log()
       </fieldset>
         <button type="submit-answer" class="submit-answer button">Submit</button>
       </form>`;
+      
 }
+
+
+
 
 function submitAnswer(questionObj) {
   $('.main-container').on('submit', '#submit-answer', function (event) {
@@ -140,22 +145,24 @@ function submitAnswer(questionObj) {
     }
   });
 }
-submitAnswer(STORE);
 
+
+
+//reference the globab variable currentQuestion and in display question fn use that index to pick the right q value
 function handleQuestions() {
   $('.main-container').on('click', '.next-question', function (event) {
+    STORE.currentQuestion++;
     event.preventDefault();
     let currentQuestionObj = STORE.questions[STORE.currentQuestion];
-    //let selectedOption = $('input[type="radio"]:checked').val();
+    
     console.log(currentQuestionObj);
-    //console.log(selectedOption);
-    let idNum = currentQuestionObj.options.findIndex(i => i === selectedOption);
-    console.log(idNum);
-    //STORE.currentQuestion === STORE.questions.length ? displayScore() : askAQuestion();
+   
+   
+    
   });
   updateQuestionNumber();
 }
-handleQuestions();
+
 
 function correctAnswer() {
   $('#submit-answer').html(
@@ -193,12 +200,19 @@ function updateQuestionNumber() {
 }
 
 
-/* when this function is called -->
-    displays the next question in the series */
 function askAQuestion() {
-  let question = STORE.questions[STORE.currentQuestion];
   
+  let question = STORE.questions[STORE.currentQuestion];
+  console.log(question);
   $('.main-container').html(generateAQuestion(question));
 }
 
+function makeQuiz() {
+  generateQuiz();
+  startQuiz();
+  submitAnswer(STORE);
+  handleQuestions();
+}
+
+$(makeQuiz);
 // function reStartQuiz(){}
