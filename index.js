@@ -72,8 +72,6 @@ function generateQuiz() {
   $('.main-container').html(startQuizHtml);  
 }
   
-
-
 /* when user clicks on start quiz button -->
     displays first question
     displays user's score */
@@ -81,25 +79,23 @@ function generateQuiz() {
 function startQuiz() {
   $('#start-quiz').submit(event => {
     event.preventDefault();
-    console.log('The quiz has started');
+  
     askAQuestion();
     displayQuestionNumber();  
     displayScore();
-    updateQuestionNumber();
   });
 }
 
-
 function displayQuestionNumber() {
   const questionHtml = `
-  <h2 class="question-number">question: ${STORE.currentQuestion} of ${STORE.questions.length}</h2>`;  
+  <h2 class="question-number">question: 1 of ${STORE.questions.length}</h2>`;  
   $('.header').append(questionHtml);
 }
 
 //add html to display score
 function displayScore() {
   const scoreHtml = `
-  <h2 class="score" id="score-counter">score: 0</h2>`;  
+  <h2 class="score" id="score-counter">score: ${STORE.score}</h2>`;  
   $('.header').append(scoreHtml);
 }
 
@@ -114,15 +110,14 @@ function generateAQuestion(questionObj) {
       <span>${option}</span>
       </label>`;
   }).join('');
-  console.log(questionSelector);
-  console.log(questionFormMaker);
+
   return `
     <form class="question-container" id="submit-answer">
       <fieldset>
           ${questionSelector}
           ${questionFormMaker}
       </fieldset>
-        <button type="submit-answer" class="submit-answer button">Submit</button>
+        <button type="submit" class="submit-answer button">Submit</button>
       </form>`;
       
 }
@@ -136,7 +131,7 @@ function submitAnswer(questionObj) {
     let answer = $('input[type="radio"]:checked').val();
     console.log(answer);
     
-    let correct = questionObj.questions[0].answer;
+    let correct = questionObj.questions[STORE.currentQuestion].answer;
     console.log(correct);
     if (answer === correct) {
       correctAnswer();
@@ -149,18 +144,19 @@ function submitAnswer(questionObj) {
 
 
 //reference the globab variable currentQuestion and in display question fn use that index to pick the right q value
-function handleQuestions() {
+function showNextQuestion() {
   $('.main-container').on('click', '.next-question', function (event) {
-    STORE.currentQuestion++;
-    event.preventDefault();
-    let currentQuestionObj = STORE.questions[STORE.currentQuestion];
     
-    console.log(currentQuestionObj);
-   
-   
-    
+    console.log(STORE.currentQuestion);
+    if (STORE.currentQuestion < STORE.questions.length - 1) {
+      updateQuestionNumber();
+      askAQuestion(); 
+    } else {
+      finalPage();
+      //console.log('this should display results page and remove the question text');
+    }
   });
-  updateQuestionNumber();
+ 
 }
 
 
@@ -170,49 +166,72 @@ function correctAnswer() {
     <img src="images/batman-onomatopoeia.png" alt="batman and robin fighting cartoon" class="images" width="200px">
       <p class="answer-me">Holy DOM manipulation, Batman! You nailed it!</p>
       <form class="question-container" id="next-question">
-        <button type="button" class="next-question button">Next Question</button>
+        <button type="button" class="next-question button">Next</button>
       </form>`
   );
   updateScore();
 }
 
 function wrongAnswer() {
+  const correct = STORE.questions[STORE.currentQuestion].answer;
   $('#submit-answer').html(
-    `<h3>Your answer is incorrect...The correct answer is </h3>
+    `<h3>Your answer is incorrect...The correct answer is: ${correct}</h3>
     
     <form class="question-container" id="next-question">
-      <button type="button" class="next-question button">Next Question</button>
+      <button type="button" class="next-question button">Next</button>
     </form>`
   );
 }
 
 function updateScore(){
-  let scoreIncrement = STORE.score;
-  scoreIncrement++;
-  console.log(scoreIncrement);
-  $('#score-counter').text(`score: ${scoreIncrement}`);
-}
-function updateQuestionNumber() {
-  let questionNumber = STORE.currentQuestion;
-  questionNumber++;
-  console.log(questionNumber);
-  $('.question-number').text(`question: ${questionNumber} of 5`);
+  STORE.score++;
+  $('.score').text(`score: ${STORE.score}`);
 }
 
+function updateQuestionNumber() {
+  STORE.currentQuestion++;
+  $('.question-number').text(`question: ${STORE.currentQuestion + 1} of 5`);
+}
 
 function askAQuestion() {
-  
   let question = STORE.questions[STORE.currentQuestion];
   console.log(question);
   $('.main-container').html(generateAQuestion(question));
 }
 
-function makeQuiz() {
+function finalPage() {
+  $('.question-number').text('Nice job!');
+  let finalScore = STORE.score;
+  let resultsHtml = `
+  <h3>You’re a regular logomaniac! You got ${finalScore} out of 5 questions correct!</h3>
+  <video
+    autoplay loop muted>
+    <source src="images/word-maniac.mp4" type="video/mp4" width="200px">
+    <track label="English" kind="none" srclang="en">
+  </video>
+    <form class="question-container" id="restart-quiz">
+      <button type="button" class="restart-quiz button">START AGAIN</button>
+    </form>`;
+  STORE.currentQuestion = 0;
+  STORE.score = 0;
+  $('.main-container').html(resultsHtml);
+}
+
+function restartQuiz() {
+  $('.main-container').on('click','.restart-quiz', function (event) {
+    $('.question-number').hide();
+    $('.score').hide();
+    generateQuiz();
+    startQuiz();
+  });
+}
+function playQuiz() {
   generateQuiz();
   startQuiz();
   submitAnswer(STORE);
-  handleQuestions();
+  showNextQuestion();
+  restartQuiz();
 }
 
-$(makeQuiz);
-// function reStartQuiz(){}
+$(playQuiz);
+
