@@ -1,6 +1,8 @@
 Quiz App 
 Submitted by Wendy Bartos (no partner)
 
+Back of Napkin designed saved in images folder
+
 function generateQuiz(){} --> adds start page html, including START button
 function startQuiz() {}  --> on click of start, display first question and score
     function askAQuestion() {} --> should be called when clicking next button
