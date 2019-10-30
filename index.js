@@ -11,7 +11,9 @@ const STORE = {
         'Topo',
         'Poeiare'
       ],
-      answer: 'Onoma'
+      answer: 'Onoma',
+      hint: 'Definition: The formation of a word from a sound associated with what is named (e.g. cuckoo, sizzle )',
+      explanation: 'Onomatopoeia originated from the Greek words "onoma," meaning "name," and "poiein," meaning "to make."'
     },
     //[1] question 2
     {
@@ -22,7 +24,9 @@ const STORE = {
         'A morbid preoccupation with words and names or a mania for word-making.',
         'A condition that is characterized by an uncanny ability to remember everyone’s name after meeting them once.'
       ],
-      answer: 'A morbid preoccupation with words and names or a mania for word-making.'
+      answer: 'A morbid preoccupation with words and names or a mania for word-making.',
+      hint: 'The root word is "Onoma."',
+      explanation: 'Onomatomania combines root word "onoma" with "mania" to make a word meaning name mania.'
     },
     //[2] question 3
     {
@@ -33,7 +37,9 @@ const STORE = {
         'Gonoware',
         'Gonotrophe'
       ],
-      answer: 'Pogono'
+      answer: 'Pogono',
+      hint: 'Definition: The act of cultivating, or growing and grooming, a mustache, beard, sideburns or other facial hair.',
+      explanation: 'Pogonotrophy originated from the Greek words "pogono," meaning "beard," and "trophia," meaning "food, nourishment."'
     },
     //[3] question 4
     {
@@ -44,7 +50,9 @@ const STORE = {
         'A fear of growing a beard more quickly than is likely, often resulting in excessive shaving.',
         'An irrational fear of beards.',
       ],
-      answer: 'An irrational fear of beards.'
+      answer: 'An irrational fear of beards.',
+      hint: 'The root word is "Pogono."',
+      explanation: '"Pogonophobia" combines root word "pogono" with "phobia" to make a word meaning fear of beards.'
     },
     //[4] question 5
     {
@@ -55,7 +63,9 @@ const STORE = {
         'Rhealis',
         'Orrea'
       ],
-      answer: 'Logos'
+      answer: 'Logos',
+      hint: 'Definition: excessive and often incoherent talkativeness or wordiness.',
+      explanation: 'Logorrhea originated from the Greek words "logos," meaning "word," and "rhoia," meaning "flow."'
     },
   ],
   currentQuestion: 0,
@@ -67,14 +77,14 @@ const STORE = {
 function generateQuiz() {
   const startQuizHtml = `<p class="definition"><h2 class="word-definition">et·​y·​mol·​o·​gy | \ ˌe-tə-ˈmä-lə-jē  \</h2>(noun): the study of the origin of words and the way in which their meanings have changed throughout history.</p>
   <form id="start-quiz">
-      <button type="submit" id="start" class="start-quiz button"><span>Start Quiz</span></button>
+      <button type="submit" id="start" class="start-quiz button" aria-label="Start Quiz"><span>Start Quiz</span></button>
   </form>`;
   $('.main-container').html(startQuizHtml);  
 }
   
 /* when user clicks on start quiz button -->
     displays first question
-    displays user's score */
+    displays question counter and user's score */
 
 function startQuiz() {
   $('#start-quiz').submit(event => {
@@ -86,16 +96,17 @@ function startQuiz() {
   });
 }
 
+//adds HTML for question tally      
 function displayQuestionNumber() {
   const questionHtml = `
-  <h2 class="question-number">question: 1 of ${STORE.questions.length}</h2>`;  
+  <h2 aria-label="Question Counter" aria-live="assertive" class="question-number">question: 1 of ${STORE.questions.length}</h2>`;  
   $('.header').append(questionHtml);
 }
 
 //add html to display score
 function displayScore() {
   const scoreHtml = `
-  <h2 class="score" id="score-counter">score: ${STORE.score}</h2>`;  
+  <h2 aria-label="Score Counter" aria-live="assertive" class="score" id="score-counter">score: ${STORE.score}</h2>`;  
   $('.header').append(scoreHtml);
 }
 
@@ -106,25 +117,38 @@ function generateAQuestion(questionObj) {
   let questionFormMaker = questionObj.options.map((option, index) => {
     return `
       <label class="answer-me" for="option-${index}">
-        <input type="radio" class="radio" id="option-${index}" value="${option}" name="answer" required
+        <input type="radio" lang="el" class="radio" id="option-${index}" value="${option}" name="answer" required
       <span>${option}</span>
       </label>`;
   }).join('');
-
+  console.log(questionSelector);  
   return `
     <form class="question-container" id="submit-answer">
       <fieldset>
           ${questionSelector}
+          <button role="button" class='hint-button' id='hint-only'>
+                <span class='button-label'>HINT</span>
+            </button>
           ${questionFormMaker}
       </fieldset>
         <button type="submit" class="submit-answer button">Submit</button>
       </form>`;
-      
 }
 
+//function displays hint for each question
+function hintButton() {
+  $('.main-container').on('click', '#hint-only', function (event) {
+    event.preventDefault();
+    const hint = STORE.questions[STORE.currentQuestion].hint;
+    console.log(hint);
+    $('#hint-only').html(`
+      <div class="hint-pop-up">
+        <p aria-live="polite">${hint}</p>
+      </div>`);
+  });
+}
 
-
-
+//on answer submit, function determines whether correct or incorrect
 function submitAnswer(questionObj) {
   $('.main-container').on('submit', '#submit-answer', function (event) {
     event.preventDefault();
@@ -141,9 +165,7 @@ function submitAnswer(questionObj) {
   });
 }
 
-
-
-//reference the globab variable currentQuestion and in display question fn use that index to pick the right q value
+//on click of Next button, if there are additional questions, moves user to next question
 function showNextQuestion() {
   $('.main-container').on('click', '.next-question', function (event) {
     
@@ -153,17 +175,18 @@ function showNextQuestion() {
       askAQuestion(); 
     } else {
       finalPage();
-      //console.log('this should display results page and remove the question text');
     }
   });
  
 }
 
-
+//displays explanation for correct answer submission, updates score when correct
 function correctAnswer() {
+  const correctExplained = STORE.questions[STORE.currentQuestion].explanation;
   $('#submit-answer').html(
     `<h3>Your answer is correct!</h3>
-    <img src="images/batman-onomatopoeia.png" alt="batman and robin fighting cartoon" class="images" width="200px">
+    <p class="answer-me" lang="el">${correctExplained}</p>
+    <img src="images/batman-onomatopoeia.png" alt="batman and robin fighting cartoon" class="images">
       <p class="answer-me">Holy DOM manipulation, Batman! You nailed it!</p>
       <form class="question-container" id="next-question">
         <button type="button" class="next-question button">Next</button>
@@ -171,34 +194,39 @@ function correctAnswer() {
   );
   updateScore();
 }
-
+//displays displays for incorrect answer submission, shows correct answer
 function wrongAnswer() {
   const correct = STORE.questions[STORE.currentQuestion].answer;
+  const incorrectExplained = STORE.questions[STORE.currentQuestion].explanation;
   $('#submit-answer').html(
     `<h3>Your answer is incorrect...The correct answer is: ${correct}</h3>
-    
+    <p class="answer-me" lang="el">${incorrectExplained}</p>
     <form class="question-container" id="next-question">
       <button type="button" class="next-question button">Next</button>
     </form>`
   );
 }
 
+//function increases score by 1
 function updateScore(){
   STORE.score++;
   $('.score').text(`score: ${STORE.score}`);
 }
 
+//increases question index by 1
 function updateQuestionNumber() {
   STORE.currentQuestion++;
   $('.question-number').text(`question: ${STORE.currentQuestion + 1} of 5`);
 }
 
+//adds HTML for any question, renders it in DOM
 function askAQuestion() {
   let question = STORE.questions[STORE.currentQuestion];
   console.log(question);
   $('.main-container').html(generateAQuestion(question));
 }
 
+//shows results and plays gif
 function finalPage() {
   $('.question-number').text('Nice job!');
   let finalScore = STORE.score;
@@ -217,6 +245,7 @@ function finalPage() {
   $('.main-container').html(resultsHtml);
 }
 
+//on button submit, resets stats and restarts quiz
 function restartQuiz() {
   $('.main-container').on('click','.restart-quiz', function (event) {
     $('.question-number').hide();
@@ -225,13 +254,14 @@ function restartQuiz() {
     startQuiz();
   });
 }
+
 function playQuiz() {
   generateQuiz();
   startQuiz();
+  hintButton();
   submitAnswer(STORE);
   showNextQuestion();
   restartQuiz();
-}
+};
 
 $(playQuiz);
-
